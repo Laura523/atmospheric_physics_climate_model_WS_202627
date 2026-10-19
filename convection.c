@@ -81,6 +81,26 @@ int main ()
     double plyr [nlyr];
     double Tlyr[nlyr];
     double theta[nlyr];
+
+    // initialize pressure and temperature profile
+    for (int i=0; i<nlyr+1; i++)
+        plev[i] = i*dp;
+
+    for (int i=0; i<nlyr; i++)
+    {
+        plyr[i] = (plev[i]+plev[i+1])/2.0;
+        Tlyr[i] = 288;                      // asssume equilibrium
+    }
+
+    // calculate initial potential temperature
+    for (int i=0; i<nlyr; i++)
+        theta[i] = TtoTheta(plyr[i], Tlyr[i]);
+
+    // print inital layer values
+    printf("initial layer values:\n");
+    for (int i=0; i<nlyr; i++)
+        printf("i=%d p=%f theta=%f\n", i, plyr[i], theta[i]);
+    // now we do the convection part here...
 }
 
 
@@ -89,6 +109,7 @@ int main ()
 
 
 // old version
+/*
 int main (int argc, char **argv)
 {
     // Define variables
@@ -113,3 +134,4 @@ int main (int argc, char **argv)
 
     return 0;
 }
+*/
