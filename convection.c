@@ -108,19 +108,16 @@ int main ()
     for (int i=0; i<nlyr; i++)
         printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], Tlyr[i], theta[i]);
 
-    // convert to altitude for fun
+    // convert to altitude for fun ...
 
-    // now we do the convection part here...
+    // convection
     bubblesort(nlyr, theta);
+
+    // convert back to temperature
+    for (int i=0; i<nlyr; i++)
+        TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
 
     printf("after covection:\n");
     for (int i=0; i<nlyr; i++)
-        printf("i=%d p=%f theta=%f\n", i, plyr[i], theta[i]);
-
-    // then convert back to temperature and print again
-    for (int i=0; i<nlyr; i++)
-    {
-        TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
-        printf("%f", TafterConvection[i]);
-    }
+        printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], TafterConvection[i], theta[i]);
 }
