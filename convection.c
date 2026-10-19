@@ -37,9 +37,9 @@
 // swap function
 void swapdouble(double *a, double *b)
 {
-    double *temp = a;
-    a = b;
-    b = temp;
+    double temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
 // bubble sort
@@ -50,7 +50,7 @@ void bubblesort(int length, double *variable)
         bool swapped = false;
         for (int i=0; i<length-j-1; i++)
         {
-            if (variable[i]>variable[i+1])
+            if (variable[i]<variable[i+1])
             {
                 swapdouble(&variable[i], &variable[i+1]);
                 swapped = true;
@@ -69,8 +69,14 @@ double TtoTheta (double p, double T)
     return theta;
 }
 
+double ThetatoT (double p, double theta)
+{
+    double p0 = 1000.0;
+    double T = theta / pow(p0/p, KAPPA);
+    return T;
+}
 
-// Bernhards version
+
 int main ()
 {
     int nlyr = 10;                          // number of layers
@@ -80,6 +86,7 @@ int main ()
     double plev[nlyr+1];
     double plyr [nlyr];
     double Tlyr[nlyr];
+    double TafterConvection[nlyr];
     double theta[nlyr];
 
     // initialize pressure and temperature profile
@@ -95,43 +102,25 @@ int main ()
     // calculate initial potential temperature
     for (int i=0; i<nlyr; i++)
         theta[i] = TtoTheta(plyr[i], Tlyr[i]);
-
+    
     // print inital layer values
     printf("initial layer values:\n");
     for (int i=0; i<nlyr; i++)
-        printf("i=%d p=%f theta=%f\n", i, plyr[i], theta[i]);
+        printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], Tlyr[i], theta[i]);
+
+    // convert to altitude for fun
+
     // now we do the convection part here...
+    bubblesort(nlyr, theta);
+
+    printf("after covection:\n");
+    for (int i=0; i<nlyr; i++)
+        printf("i=%d p=%f theta=%f\n", i, plyr[i], theta[i]);
+
+    // then convert back to temperature and print again
+    for (int i=0; i<nlyr; i++)
+    {
+        TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
+        printf("%f", TafterConvection[i]);
+    }
 }
-
-
-
-
-
-
-// old version
-/*
-int main (int argc, char **argv)
-{
-    // Define variables
-    int nlayer = 5;                 // number of levels (space inbetween called layers)
-    double Eabs = 240;              // absorbed solar energy [W/m^2]
-    double p[nlayer+1];             // pressure [hPa]
-    double theta[nlayer];           // potential temperature
-    double dp = 1000.0 / nlayer;    // pressure difference
-    double dt = 10 * 60;            // [s]
-
-    for (int i=0; i<nlayer+1; i++)  // give each level correct pressure value
-        p[i] = i * dp;
-
-    for (int i=0; i<nlayer; i++)    // give each layer correct potetial temperature value
-        theta[i] = 288;
-
-    for (int i=0; i<nlayer+1; i++)  // print all levels and their respective pressure 
-        printf ("%d %f\n", i, p[i]);
-
-    // heating step
-    double dT = Eabs * dt * G / dp / CP;
-
-    return 0;
-}
-*/
