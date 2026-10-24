@@ -33,6 +33,9 @@
 #define G 9.80665
 #define CP 1004       // heat capacity for constant pressure c_p [J/kg/K]
 #define KAPPA 2.0     // macro variable (2.0 or 7.0)
+#define alpha 1     //absorptivity, may be varied
+#define sigma 5.670   // Stefan Boltzmann Konstante
+
 
 // swap function
 void swapdouble(double *a, double *b)
@@ -89,6 +92,12 @@ int main ()
     double TafterConvection[nlyr];
     double theta[nlyr];
 
+    // Solar heating parameters
+    double Eabs = 240.0;  // W/m^2
+    double dt = 3600.0;   // time step: 1 hour in seconds
+    double dT = Eabs * G * dt / (CP * dp);
+    int nsteps = 100;
+
     // initialize pressure and temperature profile
     for (int i=0; i<nlyr+1; i++)
         plev[i] = i*dp;
@@ -96,28 +105,71 @@ int main ()
     for (int i=0; i<nlyr; i++)
     {
         plyr[i] = (plev[i]+plev[i+1])/2.0;
-        Tlyr[i] = 288;                      // asssume equilibrium
+        Tlyr[i] = 288;               // asssume equilibrium
     }
+
 
     // calculate initial potential temperature
     for (int i=0; i<nlyr; i++)
         theta[i] = TtoTheta(plyr[i], Tlyr[i]);
     
+//make plot to plot t after n timesteps, seemingly not possible in only c - make file and move to python
+//in python: ipywidgets daraus widgets dann definde slider um nicht jeden timestep seperat zu plotten
+//make results file
+//radiative cooling for ground layer
+double dQ = (Eabs - signgam * pow(Tlyr[9], 4)) * alpha * dT;
+double dTcool = dQ/CP ;
+
     // print inital layer values
     printf("initial layer values:\n");
     for (int i=0; i<nlyr; i++)
         printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], Tlyr[i], theta[i]);
 
+    //timeloop for convection and heatig
+    for (int step = 0; step < nsteps; step++)
+    {
+        Tlyr[9] += dT - dTcool; // x += y entspricht x = x+y dh dT wird immer wieder zu T9 addiert 
+        // Convert temperature to potential temperature
+        for (int i = 0; i < nlyr; i++)
+            theta[i] = TtoTheta(plyr[i], Tlyr[i]);
+
+        // Convective adjustment
+        bubblesort(nlyr, theta);
+
+        // Convert back to temperature
+        for (int i = 0; i < nlyr; i++)
+            TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
+
+        // Update temperature profile for the next time step
+        for (int i = 0; i < nlyr; i++)
+            Tlyr[i] = TafterConvection[i];
+    }
+    {printf("\nLayer values after %d timesteps:\n", nsteps);
+    }
+//print profile after the timesteps for any number of timesteps
+    int i;
+    for (i = 0; i < nlyr; i++)
+{
+    theta[i] = TtoTheta(plyr[i], Tlyr[i]);
+
+    printf("i=%d p=%f T=%f theta=%f\n",
+    i, plyr[i], Tlyr[i], theta[i]);
+}
+
+
     // convert to altitude for fun ...
 
     // convection
-    bubblesort(nlyr, theta);
+    //bubblesort(nlyr, theta);
 
     // convert back to temperature
-    for (int i=0; i<nlyr; i++)
-        TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
+    //for (int i=0; i<nlyr; i++)
+    //    TafterConvection[i] = ThetatoT(plyr[i], theta[i]);
 
-    printf("after covection:\n");
-    for (int i=0; i<nlyr; i++)
-        printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], TafterConvection[i], theta[i]);
+    //printf("after covection:\n");
+    //for (int i=0; i<nlyr; i++)
+    //    printf("i=%d p=%f T=%f theta=%f\n", i, plyr[i], TafterConvection[i], theta[i]);
 }
+
+// after doing things normally you can use : ./convection > convectionres.csv
+//to get a file with the end results
