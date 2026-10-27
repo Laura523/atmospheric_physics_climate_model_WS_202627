@@ -1,7 +1,9 @@
 #include "convection_functions.h"
+//#include "convection_functions.c"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+
 
 int main() {
   // declaration of variables
@@ -21,7 +23,7 @@ int main() {
   double Eup[nlyr]; // * upward thermal flux at top of each layer [W/m^2]
   double Edn[nlyr]; // * downward thermal flux at top of each layer [W/m^2]
   double dQ[nlyr];  // * net energy gain per layer [W/m^2]
-
+  int nangles = 180; // angle for sun radiation dependence
 
   
   // initialize pressure profile
@@ -49,11 +51,12 @@ int main() {
   // * steps (3)/(4): same alpha for every layer. Tune it until the equilibrium
   // * surface temperature is 288 K (step 3), then increase it until the surface
   // * is 1.4 K warmer (step 4). Rerun after every change.
-  double alpha = 0.5; // *
+  double alpha = 0.15; // *
 
   // test different profiles
   double Tstart[3] = {200.0, 288.0, 350.0};
   int nruns = 3;
+  int nangles = 180; //angle fpr sun radiation dependance  
 
   for (int run = 0; run < nruns; run++) {
 
@@ -92,8 +95,18 @@ int main() {
     int step = 0;
     bool converged = false;
     bool toolong = false;
+    
+//for angle dependance
+    double totalEnergy = 0.0;
 
-    // heating, cooling and convection loop
+for (int i = 0; i < nangles; i++) {
+    double theta_angle = (i + 0.5) * (M_PI/2) / nangles;
+    totalEnergy += Eabs * cos(theta_angle);
+}
+
+Eabs = totalEnergy / nangles;
+
+    // heating, cooling and convection loop with directional dependence (yet to be completed)
     while (1 == 1) {
 
       for (int i = 0; i < nlyr; i++)
@@ -104,7 +117,8 @@ int main() {
       calcRadiation(nlyr, mode, alpha, Eabs, Tlyr, Eup, Edn, dQ); // *
       for (int i = 0; i < nlyr; i++)                              // *
         Tlyr[i] += dQ[i] * G * dt / (CP * dpPa);                  // *
-
+      
+        
       for (int i = 0; i < nlyr; i++)
         theta[i] = TtoTheta(plyr[i], Tlyr[i]); // T to pot temp
 
@@ -168,3 +182,8 @@ int main() {
 
 // TODO: get a proper csv file for plotting (done: one csv file per run)  // *
 // Write down what was learned from the task                              // *
+// system converges to the same temperature indepent ent of the starting temp;alpha of 0.15 for 288 K  //*
+// 1,5 grad ziel bei alpha 0.156 etwa//*
+
+
+//plan for direction dependance: one other time loop that loops around 2 pi of the spere and calculated gow mucgh longer stuff will take //*

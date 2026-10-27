@@ -32,8 +32,8 @@
 #define G 9.80665
 #define CP 1004             // heat capacity for constant pressure c_p [J/kg/K]
 #define KAPPA (2.0 / 7.0)   //
-#define alpha 1             // absorptivity, may be varied
-#define sigma 5.670         // Stefan Boltzmann Konstante
+#define alpha 0.15            // absorptivity, may be varied
+#define sigma 5.670e-8         // Stefan Boltzmann Konstante
 
 // swap function
 void swapdouble(double *a, double *b) {
