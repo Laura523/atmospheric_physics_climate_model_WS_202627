@@ -17,5 +17,6 @@ double TtoTheta(double p, double T);
 double ThetatoT(double p, double theta);
 void calcHeight(int nlyr, double dp, double *plyr, double *Tlyr, double *zlyr);
 void calcRadiation(int nlyr, int mode, double alpha, double Eabs, double *Tlyr, double *Eup, double *Edn, double *dQ);
+void schwarzschild(int nlyr, double *Tlyr,double alpha, double *Eup,double *Edn);
 
 #endif

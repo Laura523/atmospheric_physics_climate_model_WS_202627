@@ -1,5 +1,4 @@
 #include "convection_functions.h"
-//#include "convection_functions.c"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -39,10 +38,10 @@ int main() {
 
   // solar heating parameters
   double Eabs = 240.0; // W/m^2
-  double dt = 3600.0;  // time step: 1 hour in seconds
+  double dt = 36000.0;  // time step: 10 hour in seconds
 
   double eps = 1e-6;      // convergence criterion
-  int maxsteps = 1000000; // safety abort
+ int maxsteps = 1000000; // safety abort
 
   // * Task Week 2: grey thermal radiation model
   // * mode 0 = step (0) solar heating only, mode 1 = step (1) surface cooling,
@@ -56,7 +55,6 @@ int main() {
   // test different profiles
   double Tstart[3] = {200.0, 288.0, 350.0};
   int nruns = 3;
-  int nangles = 180; //angle fpr sun radiation dependance  
 
   for (int run = 0; run < nruns; run++) {
 
@@ -96,15 +94,29 @@ int main() {
     bool converged = false;
     bool toolong = false;
     
-//for angle dependance
-    double totalEnergy = 0.0;
 
-for (int i = 0; i < nangles; i++) {
-    double theta_angle = (i + 0.5) * (M_PI/2) / nangles;
-    totalEnergy += Eabs * cos(theta_angle);
-}
+    // Solar-angle dependence
+    double totalCos = 0.0;
 
-Eabs = totalEnergy / nangles;
+    for (int i = 0; i < nangles; i++) {
+        double theta_angle =
+            (i + 0.5) * (M_PI / 2.0) / nangles;
+
+        totalCos += cos(theta_angle);
+    }
+
+    double meanCos = totalCos / nangles;
+
+    // Normalize so Eabs remains the prescribed mean input
+    double EabsAngle[nangles];
+
+    for (int i = 0; i < nangles; i++) {
+        double theta_angle =
+            (i + 0.5) * (M_PI / 2.0) / nangles;
+
+        EabsAngle[i] =
+            Eabs * cos(theta_angle) / meanCos;
+    }
 
     // heating, cooling and convection loop with directional dependence (yet to be completed)
     while (1 == 1) {
@@ -114,7 +126,10 @@ Eabs = totalEnergy / nangles;
 
       // * radiation: solar heating, thermal cooling of the surface and
       // * thermal heating/cooling of the atmosphere (depending on mode)
-      calcRadiation(nlyr, mode, alpha, Eabs, Tlyr, Eup, Edn, dQ); // *
+      double EabsNow = EabsAngle[step % nangles];
+
+      calcRadiation(nlyr, mode, alpha, EabsNow,
+              Tlyr, Eup, Edn, dQ);
       for (int i = 0; i < nlyr; i++)                              // *
         Tlyr[i] += dQ[i] * G * dt / (CP * dpPa);                  // *
       
@@ -130,6 +145,7 @@ Eabs = totalEnergy / nangles;
       for (int i = 0; i < nlyr; i++)
         Tlyr[i] = TafterConvection[i]; // update T for next step
 
+         
       step++;
 
       // * write all values of this time step to the csv file
@@ -184,6 +200,3 @@ Eabs = totalEnergy / nangles;
 // Write down what was learned from the task                              // *
 // system converges to the same temperature indepent ent of the starting temp;alpha of 0.15 for 288 K  //*
 // 1,5 grad ziel bei alpha 0.156 etwa//*
-
-
-//plan for direction dependance: one other time loop that loops around 2 pi of the spere and calculated gow mucgh longer stuff will take //*
