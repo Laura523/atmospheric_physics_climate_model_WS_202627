@@ -49,6 +49,8 @@ void calcHeight(int nlyr, double dp, double *plyr, double *Tlyr,
     zlev += dz;
   }
 }
+
+/*
 //schwazrschild equation for energy flux 
 void schwarzschild(int nlyr, double *Tlyr, double alpha,
                    double *Eup, double *Edn) {
@@ -71,6 +73,40 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
             + alpha * SIGMA * pow(Tlyr[i], 4);
     }
   }
+
+  */
+
+void schwarzschild(int nlyr, double *Tlyr, double alpha,
+                   double *Eup, double *Edn) {
+
+    double emission[nlyr];
+    // Calculate thermal emission only once
+    for (int i = 0; i < nlyr; i++) {
+        double T2 = Tlyr[i] * Tlyr[i];
+        emission[i] = SIGMA * T2 * T2;
+    }
+
+    // Downward flux
+    Edn[0] = 0.0;
+
+    for (int i = 0; i < nlyr - 1; i++) {
+        Edn[i + 1] = (1.0 - alpha) * Edn[i]
+                     + alpha * emission[i];
+    }
+
+    // Upward flux
+    Eup[nlyr - 1] = emission[nlyr - 1];
+
+    for (int i = nlyr - 2; i >= 0; i--) {
+        Eup[i] = (1.0 - alpha) * Eup[i + 1]
+                 + alpha * emission[i];
+    }
+
+}
+
+
+
+
 // * grey thermal radiation model (layer 0 = top, layer nlyr-1 = surface layer)
 // * mode 0: only absorbed solar radiation heats the lowest layer
 // * mode 1: additionally the surface cools by sigma*T_sur^4

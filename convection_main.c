@@ -40,8 +40,8 @@ int main() {
   double Eabs = 240.0; // W/m^2
   double dt = 36000.0;  // time step: 10 hour in seconds
 
-  double eps = 1e-6;      // convergence criterion
- int maxsteps = 1000000; // safety abort
+  double eps = 1e-4;      // convergence criterion
+ int maxsteps = 1000; // safety abort
 
   // * Task Week 2: grey thermal radiation model
   // * mode 0 = step (0) solar heating only, mode 1 = step (1) surface cooling,
@@ -100,7 +100,7 @@ int main() {
 
     for (int i = 0; i < nangles; i++) {
         double theta_angle =
-            (i + 0.5) * (M_PI / 2.0) / nangles;
+            (i + 30) * (M_PI / 2.0) / nangles;
 
         totalCos += cos(theta_angle);
     }
@@ -112,13 +112,13 @@ int main() {
 
     for (int i = 0; i < nangles; i++) {
         double theta_angle =
-            (i + 0.5) * (M_PI / 2.0) / nangles;
+            (i + 30) * (M_PI / 2.0) / nangles;
 
         EabsAngle[i] =
             Eabs * cos(theta_angle) / meanCos;
     }
-
-    // heating, cooling and convection loop with directional dependence (yet to be completed)
+    printf("Test 1");
+    // heating, cooling and convection loop with directional dependence 
     while (1 == 1) {
 
       for (int i = 0; i < nlyr; i++)
@@ -127,9 +127,10 @@ int main() {
       // * radiation: solar heating, thermal cooling of the surface and
       // * thermal heating/cooling of the atmosphere (depending on mode)
       double EabsNow = EabsAngle[step % nangles];
-
-      calcRadiation(nlyr, mode, alpha, EabsNow,
-              Tlyr, Eup, Edn, dQ);
+      
+      printf("Test 2");
+      schwarzschild(nlyr, Tlyr, alpha, Eup, Edn);
+      printf("Test 3");
       for (int i = 0; i < nlyr; i++)                              // *
         Tlyr[i] += dQ[i] * G * dt / (CP * dpPa);                  // *
       
@@ -145,17 +146,17 @@ int main() {
       for (int i = 0; i < nlyr; i++)
         Tlyr[i] = TafterConvection[i]; // update T for next step
 
-         
+      printf("T[%d] = %f\n", step, Tlyr[9]);
       step++;
 
       // * write all values of this time step to the csv file
-      fprintf(csv, "%d,%f,%f,%f", step, Eup[nlyr - 1], Edn[nlyr - 1],
-              dQ[nlyr - 1]);                    // *
-      for (int i = 0; i < nlyr; i++)            // *
-        fprintf(csv, ",%f", Tlyr[i]);           // *
-      for (int i = 0; i < nlyr; i++)            // *
-        fprintf(csv, ",%f", theta[i]);          // *
-      fprintf(csv, "\n");                       // *
+     // fprintf(csv, "%d,%f,%f,%f", step, Eup[nlyr - 1], Edn[nlyr - 1],
+     //         dQ[nlyr - 1]);                    // *
+     // for (int i = 0; i < nlyr; i++)            // *
+     //   fprintf(csv, ",%f", Tlyr[i]);           // *
+      //for (int i = 0; i < nlyr; i++)            // *
+     //   fprintf(csv, ",%f", theta[i]);          // *
+     // fprintf(csv, "\n");                       // *
 
       // convergence test
       double maxdiff = 0.0;
