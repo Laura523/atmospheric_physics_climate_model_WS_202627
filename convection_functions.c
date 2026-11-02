@@ -83,7 +83,7 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
     // Calculate thermal emission only once
     for (int i = 0; i < nlyr; i++) {
         double T2 = Tlyr[i] * Tlyr[i];
-        emission[i] = SIGMA * T2 * T2;
+        emission[i] = SIGMA * T2 * T2   / ( M_PI);  // distribute over all spacial angles TODO
     }
 
     // Downward flux
@@ -159,3 +159,5 @@ void calcRadiation(int nlyr, int mode, double alpha, double Eabs,
   dQ[nlyr - 1] = Eabs - Eup[nlyr - 1] + Edn[nlyr - 1];
                                   
 }
+//woche 4 plan: stufenfunktion für optical thickness ~ alpha dh es ist nun wellenlängenabhängig
+//-> füre wellenlängen für licht ein
