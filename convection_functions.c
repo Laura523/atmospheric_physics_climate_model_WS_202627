@@ -51,7 +51,7 @@ void calcHeight(int nlyr, double dp, double *plyr, double *Tlyr,
 }
 
 /*
-//schwazrschild equation for energy flux 
+//schwazrschild equation for energy flux  is actually steffan boltzmann  
 void schwarzschild(int nlyr, double *Tlyr, double alpha,
                    double *Eup, double *Edn) {
     // Downward thermal flux: atmosphere top to bottom
@@ -80,10 +80,9 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
                    double *Eup, double *Edn) {
 
     double emission[nlyr];
-    // Calculate thermal emission only once
+    // Calculate thermal emission
     for (int i = 0; i < nlyr; i++) {
-        double T2 = Tlyr[i] * Tlyr[i];
-        emission[i] = SIGMA * T2 * T2   / ( M_PI);  // distribute over all spacial angles TODO
+        emission[i] = SIGMA * pow(Tlyr[i], 4)/M_PI; // distribute over all spacial angles TODO
     }
 
     // Downward flux
@@ -95,12 +94,12 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
     }
 
     // Upward flux
-    Eup[nlyr - 1] = emission[nlyr - 1];
+    Eup[nlyr - 1] = SIGMA * pow(Tlyr[nlyr - 1], 4);
 
     for (int i = nlyr - 2; i >= 0; i--) {
-        Eup[i] = (1.0 - alpha) * Eup[i + 1]
-                 + alpha * emission[i];
-    }
+    Eup[i] = (1.0 - alpha) * Eup[i + 1]
+             + alpha * emission[i] ;
+}
 
 }
 
@@ -157,7 +156,7 @@ void calcRadiation(int nlyr, int mode, double alpha, double Eabs,
 
   // * surface: solar - thermal emission + downward thermal radiation
   dQ[nlyr - 1] = Eabs - Eup[nlyr - 1] + Edn[nlyr - 1];
-                                  
+ 
 }
 //woche 4 plan: stufenfunktion für optical thickness ~ alpha dh es ist nun wellenlängenabhängig
-//-> füre wellenlängen für licht ein
+//-> führe wellenlängen für licht ein

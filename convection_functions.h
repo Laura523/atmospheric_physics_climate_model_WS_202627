@@ -20,3 +20,10 @@ void calcRadiation(int nlyr, int mode, double alpha, double Eabs, double *Tlyr, 
 void schwarzschild(int nlyr, double *Tlyr,double alpha, double *Eup,double *Edn);
 
 #endif
+
+//baustellen: schwarzschild mit winkelintegral
+// wellenlängenabhängigkeit (optische  dicke): tau fkt von höhe, auch von wellenlänge - 2d array 
+// für sb mü =0.5 (alpha)
+//double from [3] [nlayr] (3 wg 3 wellenlängenbereichen)
+// siga t hoch 4s ersetzen durch planckk integral für wellenlängenberiehc 0 bis 8, 8 bis  12, 12 bis unendl. mikro
+// integral: pi int (b(landa) dlanda)

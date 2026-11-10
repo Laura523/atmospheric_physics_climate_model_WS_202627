@@ -41,7 +41,7 @@ int main() {
   double dt = 36000.0;  // time step: 10 hour in seconds
 
   double eps = 1e-6;      // convergence criterion
- int maxsteps = 100000; // safety abort
+  int maxsteps = 100000; // safety abort
 
   // * Task Week 2: grey thermal radiation model
   // * mode 0 = step (0) solar heating only, mode 1 = step (1) surface cooling,
@@ -50,8 +50,16 @@ int main() {
   // * steps (3)/(4): same alpha for every layer. Tune it until the equilibrium
   // * surface temperature is 288 K (step 3), then increase it until the surface
   // * is 1.4 K warmer (step 4). Rerun after every change.
-  double alpha = 0.12; // *
+double phi = M_PI; // angle in radians
+   // define number of wavelenths  
+  int nlanda = 1000;  //in mirkom
+//optical thickness (nlyr dependance for next week)
+  double tau[nlanda][nlyr];
+  double mu = cos(phi);
 
+
+ 
+  double alpha = 1- exp(-tau/mu);
   // test different profiles
   double Tstart[3] = {200.0, 288.0, 350.0};
   int nruns = 3;
@@ -100,7 +108,7 @@ int main() {
 
     for (int i = 0; i < nangles; i++) {
         double theta_angle =
-            (i + 1.0) * (M_PI / 2.0) / nangles;
+            (i + 1.0) * (M_PI)/20.0 / nangles;
 
         totalCos += cos(theta_angle);
     }
@@ -112,12 +120,12 @@ int main() {
 
     for (int i = 0; i < nangles; i++) {
         double theta_angle =
-            (i + 1.0) * (M_PI / 2.0) / nangles;
+            (i + 1.0) * (M_PI)/20.0 / nangles;
 
         EabsAngle[i] =
             Eabs * cos(theta_angle) / meanCos;
     }
-    printf("Test 1");
+
     // heating, cooling and convection loop with directional dependence 
     while (1 == 1) {
 
@@ -131,10 +139,17 @@ int main() {
 
       schwarzschild(nlyr, Tlyr, alpha, Eup, Edn);
       // dQ[i] = Edn [i] + Eup [i+1] - Edn[i+1] - Eup [i]
-      for (int i = 0; i < nlyr; i++){  
-        dQ[i] = Edn [i] + Eup [i+1] - Edn[i+1] - Eup [i];                        // *
+      for (int i = 0; i < nlyr; i++){ 
+
+        dQ[i] = Edn [i] + Eup [i+1] - Edn[i+1] - Eup [i];  
+                              // *
         Tlyr[i] += dQ[i] * G * dt / (CP * dpPa);                  // *
       }
+      // Ground (layer 19)
+      dQ[nlyr - 1] = EabsNow + Edn[nlyr - 1] - Eup[nlyr - 1];
+
+    Tlyr[nlyr - 1] +=
+    dQ[nlyr - 1] * G * dt / (CP * dpPa);  
         
       for (int i = 0; i < nlyr; i++)
         theta[i] = TtoTheta(plyr[i], Tlyr[i]); // T to pot temp
@@ -160,7 +175,7 @@ int main() {
      // fprintf(csv, "\n");                       // *
 
       // convergence test
-      double maxdiff = 0.0;
+      double maxdiff = 0.01;
       for (int i = 0; i < nlyr; i++) {
         double diff = fabs(Tlyr[i] - Told[i]);
         if (diff > maxdiff)
