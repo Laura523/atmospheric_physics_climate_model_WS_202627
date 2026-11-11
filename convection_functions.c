@@ -76,7 +76,7 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
 
   */
 
-void schwarzschild(int nlyr, double *Tlyr, double alpha,
+void schwarzschild(int nlyr, double *Tlyr, double *alpha,
                    double *Eup, double *Edn) {
 
     double emission[nlyr];
@@ -89,16 +89,16 @@ void schwarzschild(int nlyr, double *Tlyr, double alpha,
     Edn[0] = 0.0;
 
     for (int i = 0; i < nlyr - 1; i++) {
-        Edn[i + 1] = (1.0 - alpha) * Edn[i]
-                     + alpha * emission[i];
+        Edn[i + 1] = (1.0 - alpha[i]) * Edn[i]
+                     + alpha[i] * emission[i];
     }
 
     // Upward flux
     Eup[nlyr - 1] = SIGMA * pow(Tlyr[nlyr - 1], 4);
 
     for (int i = nlyr - 2; i >= 0; i--) {
-    Eup[i] = (1.0 - alpha) * Eup[i + 1]
-             + alpha * emission[i] ;
+    Eup[i] = (1.0 - alpha[i]) * Eup[i + 1]
+             + alpha[i] * emission[i] ;
 }
 
 }
@@ -147,7 +147,8 @@ void calcRadiation(int nlyr, int mode, double alpha, double Eabs,
      //        alpha * SIGMA * pow(Tlyr[i], 4);                         // *
 
   // calculate upward and downward fluxes
-  schwarzschild(nlyr, Tlyr, alpha, Eup, Edn); 
+  void schwarzschild(int nlyr, double *Tlyr, double *Eup, double *Edn, double *alpha);
+
 
   // * atmospheric layers: absorb from above and below, emit up and down
   for (int i = 0; i < nlyr - 1; i++)                                  // *

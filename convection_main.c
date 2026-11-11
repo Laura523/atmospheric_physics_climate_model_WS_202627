@@ -52,14 +52,40 @@ int main() {
   // * is 1.4 K warmer (step 4). Rerun after every change.
 double phi = M_PI; // angle in radians
    // define number of wavelenths  
-  int nlanda = 1000;  //in mirkom
+int nlanda = 100000 //number of steps for wavelenghts
 //optical thickness (nlyr dependance for next week)
-  double tau[nlanda][nlyr];
-  double mu = cos(phi);
+double tau[nlanda][nlyr];
+double mu =0.5;
+double lambda[nlanda];
+
+for (int j = 0; j < nlanda; j++) {
+
+    lambda[j] = 1.0 + j * 0.001;
+
+    if (lambda[j] < 8.0) {
+        for (int i = 0; i < nlyr; i++)
+            tau[j][i] = 1.0;
+    }
+    else if (lambda[j] <= 12.0) {
+        for (int i = 0; i < nlyr; i++)
+            tau[j][i] = 0.0;
+    }
+    else {
+        for (int i = 0; i < nlyr; i++)
+            tau[j][i] = 1.0;
+    }
+}
 
 
- 
-  double alpha = 1- exp(-tau/mu);
+//new definition for alpha via tau
+double alpha[nlanda][nlyr];
+
+for (int j = 0; j < nlanda; j++) {
+    for (int i = 0; i < nlyr; i++) {
+        alpha[j][i] = 1.0 - exp(-tau[j][i]);
+    }
+}
+
   // test different profiles
   double Tstart[3] = {200.0, 288.0, 350.0};
   int nruns = 3;
@@ -137,7 +163,7 @@ double phi = M_PI; // angle in radians
       double EabsNow = EabsAngle[step % nangles];
      
 
-      schwarzschild(nlyr, Tlyr, alpha, Eup, Edn);
+     void schwarzschild(nlyr, Tlyr, alpha, Eup, Edn);
       // dQ[i] = Edn [i] + Eup [i+1] - Edn[i+1] - Eup [i]
       for (int i = 0; i < nlyr; i++){ 
 
@@ -212,8 +238,3 @@ double phi = M_PI; // angle in radians
 
   return 0;
 }
-
-// TODO: get a proper csv file for plotting (done: one csv file per run)  // *
-// Write down what was learned from the task                              // *
-// system converges to the same temperature indepent ent of the starting temp;alpha of 0.15 for 288 K  //*
-// 1,5 grad ziel bei alpha 0.156 etwa//*
