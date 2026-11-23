@@ -41,7 +41,7 @@ int main() {
   double dt = 36000.0;  // time step: 10 hour in seconds
 
   double eps = 1e-6;      // convergence criterion
-  int maxsteps = 100000; // safety abort
+  int maxsteps = 100000; // safety abort 
 
   // * Task Week 2: grey thermal radiation model
   // * mode 0 = step (0) solar heating only, mode 1 = step (1) surface cooling,
@@ -52,7 +52,7 @@ int main() {
   // * is 1.4 K warmer (step 4). Rerun after every change.
 double phi = M_PI; // angle in radians
    // define number of wavelenths  
-int nlanda = 100000 //number of steps for wavelenghts
+int nlanda = 100000; //number of steps for wavelenghts
 //optical thickness (nlyr dependance for next week)
 double tau[nlanda][nlyr];
 double mu =0.5;
@@ -60,17 +60,17 @@ double lambda[nlanda];
 
 for (int j = 0; j < nlanda; j++) {
 
-    lambda[j] = 1.0 + j * 0.001;
+  lambda[j] = 1.0 + j * 0.001;
 
-    if (lambda[j] < 8.0) {
+  if (lambda[j] < 8.0) {
         for (int i = 0; i < nlyr; i++)
             tau[j][i] = 1.0;
     }
-    else if (lambda[j] <= 12.0) {
+  else if (lambda[j] <= 12.0) {
         for (int i = 0; i < nlyr; i++)
-            tau[j][i] = 0.0;
+            tau[j][i] = 1.0;
     }
-    else {
+  else {
         for (int i = 0; i < nlyr; i++)
             tau[j][i] = 1.0;
     }
@@ -213,6 +213,7 @@ for (int j = 0; j < nlanda; j++) {
 
       if (converged || toolong)
         break;
+      printf ("%d %f \n",step,Tlyr[nlyr-1]);  //print each timestep so we see if its actually doing anything
     }
 
     fclose(csv); // *
